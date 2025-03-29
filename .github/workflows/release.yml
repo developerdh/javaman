@@ -30,9 +30,3 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload artifacts
-        uses: actions/upload-pages-artifact@v3.0.1
-        with:
-          name: binaries
-          path: dist/*
