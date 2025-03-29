@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"javaman/internal/config"
+	"javaman/internal/detect"
 	"javaman/internal/env"
 
 	"github.com/spf13/cobra"
@@ -44,7 +45,7 @@ The version will be detected automatically from the JDK installation.`,
 		version, err := getJavaVersion(absPath)
 		if err != nil {
 			// 如果无法从命令获取版本，尝试从路径名获取
-			version = extractVersionFromPath(absPath)
+			version = detect.ExtractVersionFromDirName(filepath.Base(absPath))
 			if version == "" {
 				return fmt.Errorf("could not determine JDK version")
 			}
@@ -86,52 +87,9 @@ func getJavaVersion(jdkPath string) (string, error) {
 		if strings.Contains(firstLine, "version") {
 			parts := strings.Split(firstLine, `"`)
 			if len(parts) > 1 {
-				version := parts[1]
-				// 处理版本号格式
-				if strings.HasPrefix(version, "1.") {
-					// 对于1.8.0这样的格式，提取主版本号
-					dotIndex := strings.Index(version[2:], ".")
-					if dotIndex != -1 {
-						return version[2 : 2+dotIndex], nil
-					}
-					return version[2:], nil
-				} else {
-					// 对于11.0.2这样的格式，提取主版本号
-					dotIndex := strings.Index(version, ".")
-					if dotIndex != -1 {
-						return version[:dotIndex], nil
-					}
-					return version, nil
-				}
+				return detect.NormalizeVersion(parts[1]), nil
 			}
 		}
 	}
 	return "", fmt.Errorf("could not parse version information")
-}
-
-// extractVersionFromPath 从路径中提取版本号（作为备用方法）
-func extractVersionFromPath(path string) string {
-	base := filepath.Base(path)
-	base = strings.ToLower(base)
-
-	// 处理常见的JDK目录名模式
-	if strings.Contains(base, "jdk") {
-		// 移除"jdk"和可能的连字符
-		base = strings.TrimPrefix(base, "jdk")
-		base = strings.TrimPrefix(base, "-")
-		base = strings.TrimPrefix(base, "_")
-		base = strings.TrimSpace(base)
-
-		// 如果是 1.8 这样的格式，转换为 8
-		if strings.HasPrefix(base, "1.") {
-			base = base[2:]
-		}
-
-		// 提取版本号的第一部分
-		parts := strings.Split(base, ".")
-		if len(parts) > 0 {
-			return parts[0]
-		}
-	}
-	return ""
 }
