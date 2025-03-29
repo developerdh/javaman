@@ -45,19 +45,5 @@ changelog:
       - Merge pull request
       - Merge branch
 
-brews:
-  - name: javaman
-    homepage: "https://github.com/developerdh/javaman"
-    description: "A Java Version Manager by Shenzhen Aide Digital Intelligence"
-    license: "MIT"
-    tap:
-      owner: developerdh
-      name: homebrew-tools
-    folder: Formula
-    install: |
-      bin.install "javaman"
-    test: |
-      system "#{bin}/javaman", "--version"
-
 release:
   draft: true
