@@ -6,6 +6,7 @@ package detect
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"golang.org/x/sys/windows/registry"
@@ -89,9 +90,17 @@ func DetectJDKs() (map[string]string, error) {
 
 // isValidJDKPath 验证路径是否包含有效的JDK
 func isValidJDKPath(path string) bool {
-	javac := filepath.Join(path, "bin", "javac.exe")
-	_, err := os.Stat(javac)
-	return err == nil
+	java := filepath.Join(path, "bin", "java.exe")
+	if _, err := os.Stat(java); err != nil {
+		return false
+	}
+
+	// 验证java是否可以正常运行并返回版本信息
+	cmd := exec.Command(filepath.Join(path, "bin", "java.exe"), "-version")
+	if err := cmd.Run(); err != nil {
+		return false
+	}
+	return true
 }
 
 // GetLatestJDK 获取最新的JDK版本和路径

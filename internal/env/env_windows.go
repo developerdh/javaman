@@ -6,6 +6,7 @@ package env
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -88,9 +89,9 @@ func IsValidJDKPath(path string) bool {
 		return false
 	}
 
-	// 检查javac.exe是否存在
-	javacExe := filepath.Join(path, "bin", "javac.exe")
-	if _, err := os.Stat(javacExe); err != nil {
+	// 测试java.exe是否可以正常运行
+	cmd := exec.Command(javaExe, "-version")
+	if err := cmd.Run(); err != nil {
 		return false
 	}
 
